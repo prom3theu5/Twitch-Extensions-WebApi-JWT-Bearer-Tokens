@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Server.SocketHandlers;
 using System;
 
 namespace Server
@@ -23,7 +24,7 @@ namespace Server
             TKP = new TokenValidationParameters()
             {
                 ValidAudience = "", //Twitch Client ID
-                ValidIssuer = "https://api.twitch.tv/api", // Twitch as Issuer
+                ValidIssuer = "https://api.twitch.tv/api",
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateLifetime = true,
@@ -48,7 +49,15 @@ namespace Server
         {
             app.UseAuthentication();
             app.UseWebSockets();
-            app.UseMiddleware<WebSocketMiddleware>();
+
+            app.Map("/clock", (endpoint)=> {
+                endpoint.UseMiddleware<WebSocketClockHandler>();
+            });
+
+            app.Map("/ping", (endpoint) => {
+                endpoint.UseMiddleware<WebSocketPingHandler>();
+            });
+
             app.UseMvcWithDefaultRoute();
         }
 
